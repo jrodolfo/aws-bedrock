@@ -99,6 +99,20 @@ open_file() {
   local target_file="$1"
   local windows_target
 
+  if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
+    if command -v powershell.exe >/dev/null 2>&1; then
+      windows_target="$(aws_cli_path "$target_file")"
+      powershell.exe -NoProfile -NonInteractive -Command "Start-Process -FilePath '$windows_target'" >/dev/null 2>&1 || true
+      return 0
+    fi
+
+    if command -v explorer.exe >/dev/null 2>&1; then
+      windows_target="$(aws_cli_path "$target_file")"
+      explorer.exe "$windows_target" >/dev/null 2>&1 || true
+      return 0
+    fi
+  fi
+
   if command -v open >/dev/null 2>&1; then
     open "$target_file" >/dev/null 2>&1 || true
     return 0
@@ -118,7 +132,6 @@ open_file() {
   if command -v explorer.exe >/dev/null 2>&1; then
     windows_target="$(aws_cli_path "$target_file")"
     explorer.exe "$windows_target" >/dev/null 2>&1 || true
-    return 0
   fi
 }
 

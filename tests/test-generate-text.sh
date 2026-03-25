@@ -25,7 +25,11 @@ set -euo pipefail
 
 printf '%s\n' "$*" > "$TMPDIR/aws-bedrock-last-args.txt"
 
-response_file="${@: -1}"
+response_file="${!#}"
+if [[ "$response_file" == [A-Za-z]:\\* ]]; then
+  response_file="${response_file#C:\\gitbash}"
+  response_file="${response_file//\\//}"
+fi
 
 printf '%s\n' \
   '{"output":{"message":{"content":[{"text":"fake-text-response"}]}}}' > "$response_file"
