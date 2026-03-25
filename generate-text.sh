@@ -14,6 +14,9 @@ readonly RESPONSE_PREFIX="response-"
 readonly RESPONSE_SUFFIX=".md"
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly OUTPUT_DIR="$SCRIPT_DIR/texts"
+readonly COMMON_LIB="$SCRIPT_DIR/lib/bedrock-common.sh"
+
+source "$COMMON_LIB"
 
 usage() {
   cat <<'EOF'
@@ -23,31 +26,6 @@ Usage:
 Example:
   ./generate-text.sh "Summarize the main differences between REST and GraphQL."
 EOF
-}
-
-require_command() {
-  local cmd="$1"
-
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo "Error: required command not found: $cmd" >&2
-    if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
-      echo "On Windows with Git Bash, install $cmd and restart Git Bash so PATH is refreshed." >&2
-    fi
-    exit 1
-  fi
-}
-
-aws_cli_path() {
-  local target_path="$1"
-
-  if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
-    if command -v cygpath >/dev/null 2>&1; then
-      cygpath -w "$target_path"
-      return 0
-    fi
-  fi
-
-  printf '%s\n' "$target_path"
 }
 
 validate_invoke_target() {
@@ -64,26 +42,6 @@ validate_invoke_target() {
   fi
 }
 
-next_response_name() {
-  local max_num=0
-  local file
-  local base_name
-  local num
-
-  shopt -s nullglob
-  for file in "$OUTPUT_DIR"/${RESPONSE_PREFIX}[0-9][0-9][0-9][0-9]${RESPONSE_SUFFIX}; do
-    base_name="${file##*/}"
-    num="${base_name#${RESPONSE_PREFIX}}"
-    num="${num%${RESPONSE_SUFFIX}}"
-    if (( 10#$num > max_num )); then
-      max_num=$((10#$num))
-    fi
-  done
-  shopt -u nullglob
-
-  printf "%s/%s%04d%s\n" "$OUTPUT_DIR" "$RESPONSE_PREFIX" "$((max_num + 1))" "$RESPONSE_SUFFIX"
-}
-
 if [[ $# -eq 0 ]]; then
   usage
   exit 1
@@ -98,7 +56,7 @@ validate_invoke_target
 
 mkdir -p "$OUTPUT_DIR"
 
-output_text="$(next_response_name)"
+output_text="$(next_numbered_path "$OUTPUT_DIR" "$RESPONSE_PREFIX" "$RESPONSE_SUFFIX")"
 request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-request.XXXXXX.json")"
 response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-response.XXXXXX.json")"
 aws_request_file="$(aws_cli_path "$request_file")"

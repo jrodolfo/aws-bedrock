@@ -11,6 +11,9 @@ readonly IMAGE_PREFIX="image-"
 readonly IMAGE_SUFFIX=".png"
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly OUTPUT_DIR="$SCRIPT_DIR/images"
+readonly COMMON_LIB="$SCRIPT_DIR/lib/bedrock-common.sh"
+
+source "$COMMON_LIB"
 
 usage() {
   cat <<'EOF'
@@ -20,31 +23,6 @@ Usage:
 Example:
   ./generate-image.sh "A green parrot sitting on a tree branch, tropical jungle, photorealistic, high detail"
 EOF
-}
-
-require_command() {
-  local cmd="$1"
-
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo "Error: required command not found: $cmd" >&2
-    if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
-      echo "On Windows with Git Bash, install $cmd and restart Git Bash so PATH is refreshed." >&2
-    fi
-    exit 1
-  fi
-}
-
-aws_cli_path() {
-  local target_path="$1"
-
-  if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
-    if command -v cygpath >/dev/null 2>&1; then
-      cygpath -w "$target_path"
-      return 0
-    fi
-  fi
-
-  printf '%s\n' "$target_path"
 }
 
 validate_model_id() {
@@ -57,26 +35,6 @@ validate_model_id() {
       exit 1
       ;;
   esac
-}
-
-next_image_name() {
-  local max_num=0
-  local file
-  local base_name
-  local num
-
-  shopt -s nullglob
-  for file in "$OUTPUT_DIR"/${IMAGE_PREFIX}[0-9][0-9][0-9][0-9]${IMAGE_SUFFIX}; do
-    base_name="${file##*/}"
-    num="${base_name#${IMAGE_PREFIX}}"
-    num="${num%${IMAGE_SUFFIX}}"
-    if (( 10#$num > max_num )); then
-      max_num=$((10#$num))
-    fi
-  done
-  shopt -u nullglob
-
-  printf "%s/%s%04d%s\n" "$OUTPUT_DIR" "$IMAGE_PREFIX" "$((max_num + 1))" "$IMAGE_SUFFIX"
 }
 
 decode_base64_to_file() {
@@ -150,7 +108,7 @@ validate_model_id
 
 mkdir -p "$OUTPUT_DIR"
 
-output_image="$(next_image_name)"
+output_image="$(next_numbered_path "$OUTPUT_DIR" "$IMAGE_PREFIX" "$IMAGE_SUFFIX")"
 request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-request.XXXXXX.json")"
 response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-response.XXXXXX.json")"
 aws_request_file="$(aws_cli_path "$request_file")"

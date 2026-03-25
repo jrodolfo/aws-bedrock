@@ -5,6 +5,7 @@ set -euo pipefail
 readonly TEST_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_DIR="$(cd -- "$TEST_DIR/.." && pwd)"
 readonly SOURCE_SCRIPT="$PROJECT_DIR/generate-text.sh"
+readonly COMMON_LIB="$PROJECT_DIR/lib/bedrock-common.sh"
 
 work_dir="$(mktemp -d "${TMPDIR:-/tmp}/bedrock-generate-text-test.XXXXXX")"
 
@@ -16,6 +17,8 @@ trap cleanup EXIT
 
 cp "$SOURCE_SCRIPT" "$work_dir/generate-text.sh"
 chmod +x "$work_dir/generate-text.sh"
+mkdir -p "$work_dir/lib"
+cp "$COMMON_LIB" "$work_dir/lib/bedrock-common.sh"
 
 mkdir -p "$work_dir/mock-bin"
 
