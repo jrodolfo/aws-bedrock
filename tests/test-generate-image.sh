@@ -27,8 +27,12 @@ printf '%s\n' "$*" > "$TMPDIR/aws-bedrock-last-args.txt"
 
 response_file="${!#}"
 if [[ "$response_file" == [A-Za-z]:\\* ]]; then
-  response_file="${response_file#C:\\gitbash}"
-  response_file="${response_file//\\//}"
+  if command -v cygpath >/dev/null 2>&1; then
+    response_file="$(cygpath -u "$response_file")"
+  else
+    response_file="${response_file#C:\\gitbash}"
+    response_file="${response_file//\\//}"
+  fi
 fi
 image_b64="$(printf 'fake-image-data' | base64)"
 
@@ -75,13 +79,21 @@ cat > "$work_dir/mock-bin/cygpath" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ "${1:-}" != "-w" ]]; then
-  echo "unexpected cygpath arguments: $*" >&2
-  exit 1
-fi
-
-unix_path="$2"
-printf 'C:\\gitbash%s\n' "${unix_path//\//\\}"
+case "${1:-}" in
+  -w)
+    unix_path="$2"
+    printf 'C:\\gitbash%s\n' "${unix_path//\//\\}"
+    ;;
+  -u)
+    windows_path="$2"
+    windows_path="${windows_path#C:\\gitbash}"
+    printf '%s\n' "${windows_path//\\//}"
+    ;;
+  *)
+    echo "unexpected cygpath arguments: $*" >&2
+    exit 1
+    ;;
+esac
 EOF
 
 chmod +x "$work_dir/mock-bin/cygpath"
