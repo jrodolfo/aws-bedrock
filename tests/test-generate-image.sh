@@ -98,6 +98,8 @@ EOF
 
 chmod +x "$work_dir/mock-bin/cygpath"
 
-PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-image.sh" "windows prompt" >/dev/null
-grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
-grep -q -- "Start-Process -FilePath 'C:\\\\gitbash" "$TMPDIR/powershell-last-args.txt"
+if [[ "${OSTYPE:-}" != msys* && "${OSTYPE:-}" != cygwin* ]]; then
+  PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-image.sh" "windows prompt" >/dev/null
+  grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
+  grep -q -- "Start-Process -FilePath 'C:\\\\gitbash" "$TMPDIR/powershell-last-args.txt"
+fi

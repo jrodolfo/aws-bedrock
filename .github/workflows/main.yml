@@ -58,5 +58,5 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          bash ./tests/test-generate-image.sh
-          bash ./tests/test-generate-text.sh
+          bash -x ./tests/test-generate-image.sh
+          bash -x ./tests/test-generate-text.sh
