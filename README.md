@@ -93,11 +93,44 @@ Optional flags:
 - `--output-dir` to choose where generated files are written
 - `--no-open` on the image script to skip opening the output file
 
+## environment variables
+
+You can configure the scripts with environment variables instead of passing everything on the command line.
+
+Common:
+
+- `BEDROCK_REGION`
+- `AWS_REGION`
+
+Image generation:
+
+- `MODEL_ID`
+
+Text generation:
+
+- `TEXT_INFERENCE_PROFILE_ID`
+- `MODEL_ID` as an explicit advanced override
+
+Precedence for region:
+
+1. `--region`
+2. `BEDROCK_REGION`
+3. `AWS_REGION`
+4. built-in default `us-east-1`
+
+Example:
+
+```bash
+export BEDROCK_REGION=us-west-2
+export TEXT_INFERENCE_PROFILE_ID=us.amazon.nova-2-lite-v1:0
+```
+
+See [.env.example](/Users/jrodolfo/workspace/aws/aws-bedrock/.env.example) for a minimal template.
+
 Windows note:
 
 - use Git Bash for the current scripts
 - PowerShell is not a first-class target yet
-- when Git Bash calls the Windows AWS CLI, the scripts convert temp-file paths for `aws.exe`
 
 ## project structure
 
@@ -143,7 +176,7 @@ What it does:
 Configuration notes:
 
 - by default the script uses `us.amazon.nova-2-lite-v1:0`
-- you can override it with `TEXT_INFERENCE_PROFILE_ID` or `BEDROCK_TEXT_INFERENCE_PROFILE_ID`
+- you can override it with `TEXT_INFERENCE_PROFILE_ID`
 - the value should be the inference profile ID or ARN used for Nova 2 Lite
 - the script still accepts `MODEL_ID` as an explicit override, but the normal path is to use an inference profile
 
@@ -176,7 +209,6 @@ The tests mock the `aws` command, so they do not make live Bedrock calls.
 
 - If you see `Error: required command not found: jq`, install `jq`, restart Git Bash, and rerun `command -v jq`.
 - If you see `Error: required command not found: aws`, install the AWS CLI, restart Git Bash, and rerun `command -v aws`.
-- If you see an AWS CLI error about `file:///tmp/...` not being found on Windows, update to the latest version of these scripts so Git Bash temp paths are converted for `aws.exe`.
 - If `aws configure` has not been run yet, the scripts will fail when Bedrock is invoked.
 - If Bedrock access is not enabled for the configured account and region, the AWS CLI call will fail even when local tools are installed correctly.
 

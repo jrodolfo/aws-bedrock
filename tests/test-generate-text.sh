@@ -71,6 +71,10 @@ PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite
 [[ -f "$custom_text_dir/response-0002.md" ]]
 grep -q -- '--model-id eu.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
 
+PATH="$work_dir/mock-bin:$PATH" BEDROCK_REGION="eu-central-1" \
+  "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "env region prompt" >/dev/null
+grep -q -- '--region eu-central-1' "$TMPDIR/aws-bedrock-last-args.txt"
+
 printf 'older-response' > "$custom_text_dir/response-0007.md"
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "third prompt" >/dev/null
 [[ -f "$custom_text_dir/response-0008.md" ]]

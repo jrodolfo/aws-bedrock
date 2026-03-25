@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly DEFAULT_REGION="us-east-1"
+readonly DEFAULT_REGION="${BEDROCK_REGION:-${AWS_REGION:-us-east-1}}"
 readonly MODEL_ID="${MODEL_ID:-amazon.nova-canvas-v1:0}"
 readonly WIDTH=1024
 readonly HEIGHT=1024
