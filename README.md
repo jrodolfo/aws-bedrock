@@ -129,7 +129,7 @@ For issues or inquiries, feel free to contact the maintainer:
 
 - **Name:** Rod Oliveira
 - **Role:** Software Developer
-- **Emails:** jrodolfo@gmail.com
-- **GitHub links:** https://github.com/jrodolfo
+- **Email:** jrodolfo@gmail.com
+- **GitHub:** https://github.com/jrodolfo
 - **LinkedIn:** https://www.linkedin.com/in/rodoliveira
 - **Webpage:** https://jrodolfo.net
