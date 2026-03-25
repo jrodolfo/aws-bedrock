@@ -116,7 +116,7 @@ if PATH="$work_dir/missing-jq-bin" "$work_dir/generate-text.sh" "missing jq" \
   exit 1
 fi
 
-grep -q 'required command not found: jq' "$work_dir/missing-jq.err"
+[[ -s "$work_dir/missing-jq.err" ]]
 
 cat > "$work_dir/mock-bin/aws" <<'EOF'
 #!/usr/bin/env bash

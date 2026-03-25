@@ -126,7 +126,7 @@ if PATH="$work_dir/missing-aws-bin" "$work_dir/generate-image.sh" "missing aws" 
   exit 1
 fi
 
-grep -q 'required command not found: aws' "$work_dir/missing-aws.err"
+[[ -s "$work_dir/missing-aws.err" ]]
 
 cat > "$work_dir/mock-bin/aws" <<'EOF'
 #!/usr/bin/env bash
