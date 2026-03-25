@@ -1,12 +1,12 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-readonly TEST_DIR="$(cd "$(dirname "$0")" && pwd)"
-readonly PROJECT_DIR="$(cd "$TEST_DIR/.." && pwd)"
+readonly TEST_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd -- "$TEST_DIR/.." && pwd)"
 readonly SOURCE_SCRIPT="$PROJECT_DIR/generate-image.sh"
 
-work_dir="$(mktemp -d "/tmp/bedrock-generate-image-test.XXXXXX")"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/bedrock-generate-image-test.XXXXXX")"
 
 cleanup() {
   rm -rf "$work_dir"
@@ -20,7 +20,7 @@ chmod +x "$work_dir/generate-image.sh"
 mkdir -p "$work_dir/mock-bin"
 
 cat > "$work_dir/mock-bin/aws" <<'EOF'
-#!/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
 
 response_file="${@: -1}"
@@ -30,7 +30,7 @@ printf '{"images":["%s"]}\n' "$image_b64" > "$response_file"
 EOF
 
 cat > "$work_dir/mock-bin/open" <<'EOF'
-#!/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
 
 exit 0

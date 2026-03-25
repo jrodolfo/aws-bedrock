@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 
 set -euo pipefail
 
@@ -12,7 +12,7 @@ readonly TEMPERATURE=0.7
 readonly TOP_P=0.9
 readonly RESPONSE_PREFIX="response-"
 readonly RESPONSE_SUFFIX=".md"
-readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly OUTPUT_DIR="$SCRIPT_DIR/texts"
 
 usage() {
@@ -50,14 +50,20 @@ validate_invoke_target() {
 
 next_response_name() {
   local max_num=0
-  local file num
+  local file
+  local base_name
+  local num
 
-  for file in "$OUTPUT_DIR"/${RESPONSE_PREFIX}[0-9][0-9][0-9][0-9]${RESPONSE_SUFFIX}(N); do
-    num="${file:t}"
-    num="${num#${RESPONSE_PREFIX}}"
+  shopt -s nullglob
+  for file in "$OUTPUT_DIR"/${RESPONSE_PREFIX}[0-9][0-9][0-9][0-9]${RESPONSE_SUFFIX}; do
+    base_name="${file##*/}"
+    num="${base_name#${RESPONSE_PREFIX}}"
     num="${num%${RESPONSE_SUFFIX}}"
-    (( 10#$num > max_num )) && max_num=$((10#$num))
+    if (( 10#$num > max_num )); then
+      max_num=$((10#$num))
+    fi
   done
+  shopt -u nullglob
 
   printf "%s/%s%04d%s\n" "$OUTPUT_DIR" "$RESPONSE_PREFIX" "$((max_num + 1))" "$RESPONSE_SUFFIX"
 }
@@ -77,8 +83,8 @@ validate_invoke_target
 mkdir -p "$OUTPUT_DIR"
 
 output_text="$(next_response_name)"
-request_file="$(mktemp "/tmp/bedrock-text-request.XXXXXX.json")"
-response_file="$(mktemp "/tmp/bedrock-text-response.XXXXXX.json")"
+request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-request.XXXXXX.json")"
+response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-response.XXXXXX.json")"
 
 cleanup() {
   rm -f "$request_file" "$response_file"

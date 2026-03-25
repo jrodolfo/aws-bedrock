@@ -10,15 +10,15 @@ help:
 		'  make test-text   Run text generator tests'
 
 check:
-	zsh -n generate-image.sh
-	zsh -n generate-text.sh
-	zsh -n tests/test-generate-image.sh
-	zsh -n tests/test-generate-text.sh
+	bash -n generate-image.sh
+	bash -n generate-text.sh
+	bash -n tests/test-generate-image.sh
+	bash -n tests/test-generate-text.sh
 
 test: check test-image test-text
 
 test-image:
-	./tests/test-generate-image.sh
+	bash ./tests/test-generate-image.sh
 
 test-text:
-	./tests/test-generate-text.sh
+	bash ./tests/test-generate-text.sh

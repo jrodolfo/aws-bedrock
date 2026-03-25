@@ -1,10 +1,10 @@
 # aws bedrock shell playground
 
-![shell](https://img.shields.io/badge/shell-zsh-89e051)
+![shell](https://img.shields.io/badge/shell-bash-89e051)
 ![aws bedrock](https://img.shields.io/badge/aws-bedrock-ff9900)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
-Small `zsh` scripts for experimenting with Amazon Bedrock from the command line.
+Small `bash` scripts for experimenting with Amazon Bedrock from the command line.
 
 The project keeps two workflows separate on purpose:
 
@@ -18,11 +18,13 @@ That split keeps the model contracts explicit and avoids mixing image-generation
 - sequential output naming for generated files
 - separate scripts for image and text model families
 - shell-based tests that do not make live Bedrock calls
+- Git Bash support on Windows
 - minimal dependencies and no framework setup
 
 ## prerequisites
 
-- macOS or a Unix-like shell environment with `zsh`
+- macOS, Linux, or Windows with Git Bash
+- `bash`
 - AWS CLI installed
 - Bedrock model access enabled in your AWS account
 - AWS credentials configured locally
@@ -49,6 +51,11 @@ aws configure
 ./generate-text.sh "Summarize the main differences between REST and GraphQL."
 ```
 
+Windows note:
+
+- use Git Bash for the current scripts
+- PowerShell is not a first-class target yet
+
 ## project structure
 
 ```text
@@ -72,7 +79,7 @@ What it does:
 
 - sends the prompt to `amazon.nova-canvas-v1:0`
 - saves the result under `images/` as `image-0001.png`, `image-0002.png`, and so on
-- opens the generated image automatically on macOS
+- opens the generated image automatically when a supported OS opener is available
 
 ## text generation
 
@@ -126,6 +133,7 @@ The tests mock the `aws` command, so they do not make live Bedrock calls.
 - output folders such as `images/` and `texts/` are ignored by Git
 - each script validates the model ID so image and text requests do not get mixed up
 - as of March 25, 2026, Nova 2 Lite may require an inference profile instead of direct on-demand invocation in some Bedrock setups
+- Windows support targets Git Bash; PowerShell would require separate scripts
 
 ## license
 

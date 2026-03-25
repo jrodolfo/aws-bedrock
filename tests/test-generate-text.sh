@@ -1,12 +1,12 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-readonly TEST_DIR="$(cd "$(dirname "$0")" && pwd)"
-readonly PROJECT_DIR="$(cd "$TEST_DIR/.." && pwd)"
+readonly TEST_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd -- "$TEST_DIR/.." && pwd)"
 readonly SOURCE_SCRIPT="$PROJECT_DIR/generate-text.sh"
 
-work_dir="$(mktemp -d "/tmp/bedrock-generate-text-test.XXXXXX")"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/bedrock-generate-text-test.XXXXXX")"
 
 cleanup() {
   rm -rf "$work_dir"
@@ -20,7 +20,7 @@ chmod +x "$work_dir/generate-text.sh"
 mkdir -p "$work_dir/mock-bin"
 
 cat > "$work_dir/mock-bin/aws" <<'EOF'
-#!/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
 
 printf '%s\n' "$*" > "$TMPDIR/aws-bedrock-last-args.txt"
@@ -31,14 +31,7 @@ printf '%s\n' \
   '{"output":{"message":{"content":[{"text":"fake-text-response"}]}}}' > "$response_file"
 EOF
 
-cat > "$work_dir/mock-bin/open" <<'EOF'
-#!/bin/zsh
-set -euo pipefail
-
-exit 0
-EOF
-
-chmod +x "$work_dir/mock-bin/aws" "$work_dir/mock-bin/open"
+chmod +x "$work_dir/mock-bin/aws"
 
 export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
