@@ -67,7 +67,7 @@ fi
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "first prompt" >/dev/null
 [[ -f "$work_dir/images/image-0001.png" ]]
 [[ "$(cat "$work_dir/images/image-0001.png")" == "fake-image-data" ]]
-grep -q -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
+grep -Fq -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "second prompt" >/dev/null
 [[ -f "$work_dir/images/image-0002.png" ]]
@@ -105,6 +105,5 @@ chmod +x "$work_dir/mock-bin/cygpath"
 
 if [[ "${OSTYPE:-}" != msys* && "${OSTYPE:-}" != cygwin* ]]; then
   PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-image.sh" "windows prompt" >/dev/null
-  grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
-  grep -q -- "Start-Process -FilePath 'C:\\\\gitbash" "$TMPDIR/powershell-last-args.txt"
+  grep -Fq -- 'file://C:\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
 fi

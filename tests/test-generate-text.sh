@@ -55,7 +55,7 @@ PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" "first prompt" >"$w
 grep -q "Created .*response-0001.md" "$work_dir/first.out"
 grep -q "fake-text-response" "$work_dir/first.out"
 grep -q -- '--model-id us.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
-grep -q -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
+grep -Fq -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-text.sh" "second prompt" >/dev/null
@@ -95,5 +95,5 @@ chmod +x "$work_dir/mock-bin/cygpath"
 
 if [[ "${OSTYPE:-}" != msys* && "${OSTYPE:-}" != cygwin* ]]; then
   PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-text.sh" "windows prompt" >/dev/null
-  grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
+  grep -Fq -- 'file://C:\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
 fi
