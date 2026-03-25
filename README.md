@@ -40,7 +40,7 @@ aws configure
 2. Make sure your account can invoke the models used by these scripts.
 
 - `amazon.nova-canvas-v1:0`
-- `amazon.nova-2-lite-v1:0`
+- a Nova 2 Lite inference profile such as `us.amazon.nova-2-lite-v1:0`
 
 3. Run one of the generators.
 
@@ -84,9 +84,16 @@ Generate text with Amazon Nova 2 Lite:
 
 What it does:
 
-- sends the prompt to `amazon.nova-2-lite-v1:0`
+- sends the prompt through the configured Nova 2 Lite inference profile
 - saves the result under `texts/` as `response-0001.txt`, `response-0002.txt`, and so on
 - prints the generated response to the terminal
+
+Configuration notes:
+
+- by default the script uses `us.amazon.nova-2-lite-v1:0`
+- you can override it with `TEXT_INFERENCE_PROFILE_ID` or `BEDROCK_TEXT_INFERENCE_PROFILE_ID`
+- the value should be the inference profile ID or ARN used for Nova 2 Lite
+- the script still accepts `MODEL_ID` as an explicit override, but the normal path is to use an inference profile
 
 ## sample prompts
 
@@ -118,6 +125,7 @@ The tests mock the `aws` command, so they do not make live Bedrock calls.
 - default region is `us-east-1`
 - output folders such as `images/` and `texts/` are ignored by Git
 - each script validates the model ID so image and text requests do not get mixed up
+- as of March 25, 2026, Nova 2 Lite may require an inference profile instead of direct on-demand invocation in some Bedrock setups
 
 ## license
 

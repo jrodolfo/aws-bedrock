@@ -3,7 +3,10 @@
 set -euo pipefail
 
 readonly REGION="us-east-1"
-readonly MODEL_ID="${MODEL_ID:-amazon.nova-2-lite-v1:0}"
+readonly TEXT_MODEL_ID="amazon.nova-2-lite-v1:0"
+readonly DEFAULT_INFERENCE_PROFILE_ID="us.amazon.nova-2-lite-v1:0"
+readonly INFERENCE_PROFILE_ID="${TEXT_INFERENCE_PROFILE_ID:-${BEDROCK_TEXT_INFERENCE_PROFILE_ID:-$DEFAULT_INFERENCE_PROFILE_ID}}"
+readonly INVOKE_TARGET="${MODEL_ID:-$INFERENCE_PROFILE_ID}"
 readonly MAX_TOKENS=1000
 readonly TEMPERATURE=0.7
 readonly TOP_P=0.9
@@ -31,16 +34,18 @@ require_command() {
   fi
 }
 
-validate_model_id() {
-  case "$MODEL_ID" in
-    amazon.nova-2-lite-v1:0)
-      ;;
-    *)
-      echo "Error: MODEL_ID=$MODEL_ID is not a Nova 2 Lite text model for this script." >&2
-      echo "Use Amazon Nova 2 Lite instead: amazon.nova-2-lite-v1:0" >&2
-      exit 1
-      ;;
-  esac
+validate_invoke_target() {
+  if [[ -n "${MODEL_ID:-}" ]]; then
+    case "$MODEL_ID" in
+      "$TEXT_MODEL_ID"|*.inference-profile/*|arn:aws*:bedrock:*:inference-profile/*|us.amazon.nova-2-lite-v1:0|eu.amazon.nova-2-lite-v1:0|apac.amazon.nova-2-lite-v1:0)
+        ;;
+      *)
+        echo "Error: MODEL_ID=$MODEL_ID is not a supported Nova 2 Lite invoke target for this script." >&2
+        echo "Use a Nova 2 Lite inference profile ID/ARN, or set TEXT_INFERENCE_PROFILE_ID instead." >&2
+        exit 1
+        ;;
+    esac
+  fi
 }
 
 next_response_name() {
@@ -67,7 +72,7 @@ prompt_text="$*"
 require_command aws
 require_command jq
 require_command mktemp
-validate_model_id
+validate_invoke_target
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -106,7 +111,7 @@ jq -n \
 
 aws bedrock-runtime invoke-model \
   --region "$REGION" \
-  --model-id "$MODEL_ID" \
+  --model-id "$INVOKE_TARGET" \
   --body "file://$request_file" \
   --cli-binary-format raw-in-base64-out \
   "$response_file" >/dev/null
