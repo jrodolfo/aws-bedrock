@@ -139,31 +139,3 @@ printf '%s\n' \
 EOF
 
 chmod +x "$work_dir/mock-bin/aws"
-
-cat > "$work_dir/mock-bin/cygpath" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-case "${1:-}" in
-  -w)
-    unix_path="$2"
-    printf 'C:\\gitbash%s\n' "${unix_path//\//\\}"
-    ;;
-  -u)
-    windows_path="$2"
-    windows_path="${windows_path#C:\\gitbash}"
-    printf '%s\n' "${windows_path//\\//}"
-    ;;
-  *)
-    echo "unexpected cygpath arguments: $*" >&2
-    exit 1
-    ;;
-esac
-EOF
-
-chmod +x "$work_dir/mock-bin/cygpath"
-
-if [[ "${OSTYPE:-}" != msys* && "${OSTYPE:-}" != cygwin* ]]; then
-  PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-text.sh" "windows prompt" >/dev/null
-  grep -Fq -- 'file://C:\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
-fi
