@@ -62,22 +62,33 @@ chmod +x "$work_dir/mock-bin/aws" "$work_dir/mock-bin/open" "$work_dir/mock-bin/
 export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
 
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --help >"$work_dir/help.out"
+grep -q -- '--region REGION' "$work_dir/help.out"
+grep -q -- '--output-dir DIR' "$work_dir/help.out"
+grep -q -- '--no-open' "$work_dir/help.out"
+
 expected_request_path="$TMPDIR/bedrock-request"
 if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
   expected_request_path="$(cygpath -w "$expected_request_path")"
 fi
 
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "first prompt" >/dev/null
-[[ -f "$work_dir/images/image-0001.png" ]]
-[[ "$(cat "$work_dir/images/image-0001.png")" == "fake-image-data" ]]
+custom_image_dir="$work_dir/custom-images"
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --region us-west-2 --output-dir "$custom_image_dir" --no-open "first prompt" >/dev/null
+[[ -f "$custom_image_dir/image-0001.png" ]]
+[[ "$(cat "$custom_image_dir/image-0001.png")" == "fake-image-data" ]]
 grep -Fq -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q -- '--region us-west-2' "$TMPDIR/aws-bedrock-last-args.txt"
+if [[ -f "$TMPDIR/powershell-last-args.txt" ]]; then
+  echo "Expected --no-open to skip opener invocation" >&2
+  exit 1
+fi
 
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "second prompt" >/dev/null
-[[ -f "$work_dir/images/image-0002.png" ]]
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --output-dir "$custom_image_dir" "second prompt" >/dev/null
+[[ -f "$custom_image_dir/image-0002.png" ]]
 
-printf 'older-image' > "$work_dir/images/image-0007.png"
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "third prompt" >/dev/null
-[[ -f "$work_dir/images/image-0008.png" ]]
+printf 'older-image' > "$custom_image_dir/image-0007.png"
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --output-dir "$custom_image_dir" "third prompt" >/dev/null
+[[ -f "$custom_image_dir/image-0008.png" ]]
 
 if PATH="$work_dir/mock-bin:$PATH" MODEL_ID="amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-image.sh" "fourth prompt" >/dev/null 2>"$work_dir/invalid-model.err"; then

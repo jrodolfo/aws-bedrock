@@ -47,27 +47,33 @@ chmod +x "$work_dir/mock-bin/aws"
 export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
 
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --help >"$work_dir/help.out"
+grep -q -- '--region REGION' "$work_dir/help.out"
+grep -q -- '--output-dir DIR' "$work_dir/help.out"
+
 expected_request_path="$TMPDIR/bedrock-text-request"
 if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
   expected_request_path="$(cygpath -w "$expected_request_path")"
 fi
 
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" "first prompt" >"$work_dir/first.out"
-[[ -f "$work_dir/texts/response-0001.md" ]]
-[[ "$(cat "$work_dir/texts/response-0001.md")" == "fake-text-response" ]]
+custom_text_dir="$work_dir/custom-texts"
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --region us-west-2 --output-dir "$custom_text_dir" "first prompt" >"$work_dir/first.out"
+[[ -f "$custom_text_dir/response-0001.md" ]]
+[[ "$(cat "$custom_text_dir/response-0001.md")" == "fake-text-response" ]]
 grep -q "Created .*response-0001.md" "$work_dir/first.out"
 grep -q "fake-text-response" "$work_dir/first.out"
 grep -q -- '--model-id us.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
 grep -Fq -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q -- '--region us-west-2' "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite-v1:0" \
-  "$work_dir/generate-text.sh" "second prompt" >/dev/null
-[[ -f "$work_dir/texts/response-0002.md" ]]
+  "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "second prompt" >/dev/null
+[[ -f "$custom_text_dir/response-0002.md" ]]
 grep -q -- '--model-id eu.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
 
-printf 'older-response' > "$work_dir/texts/response-0007.md"
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" "third prompt" >/dev/null
-[[ -f "$work_dir/texts/response-0008.md" ]]
+printf 'older-response' > "$custom_text_dir/response-0007.md"
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "third prompt" >/dev/null
+[[ -f "$custom_text_dir/response-0008.md" ]]
 
 if PATH="$work_dir/mock-bin:$PATH" MODEL_ID="amazon.nova-canvas-v1:0" TEXT_INFERENCE_PROFILE_ID="us.amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-text.sh" "fourth prompt" >/dev/null 2>"$work_dir/invalid-model.err"; then

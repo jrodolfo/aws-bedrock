@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly REGION="us-east-1"
+readonly DEFAULT_REGION="us-east-1"
 readonly TEXT_MODEL_ID="amazon.nova-2-lite-v1:0"
 readonly DEFAULT_INFERENCE_PROFILE_ID="us.amazon.nova-2-lite-v1:0"
 readonly INFERENCE_PROFILE_ID="${TEXT_INFERENCE_PROFILE_ID:-${BEDROCK_TEXT_INFERENCE_PROFILE_ID:-$DEFAULT_INFERENCE_PROFILE_ID}}"
@@ -13,7 +13,6 @@ readonly TOP_P=0.9
 readonly RESPONSE_PREFIX="response-"
 readonly RESPONSE_SUFFIX=".md"
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-readonly OUTPUT_DIR="$SCRIPT_DIR/texts"
 readonly COMMON_LIB="$SCRIPT_DIR/lib/bedrock-common.sh"
 
 source "$COMMON_LIB"
@@ -21,10 +20,16 @@ source "$COMMON_LIB"
 usage() {
   cat <<'EOF'
 Usage:
-  ./generate-text.sh "your prompt text"
+  ./generate-text.sh [--region REGION] [--output-dir DIR] "your prompt text"
+  ./generate-text.sh --help
 
 Example:
   ./generate-text.sh "Summarize the main differences between REST and GraphQL."
+
+Options:
+  --help              Show this help message
+  --region REGION     AWS region to use (default: us-east-1)
+  --output-dir DIR    Directory for generated text files (default: ./texts)
 EOF
 }
 
@@ -42,6 +47,42 @@ validate_invoke_target() {
   fi
 }
 
+region="$DEFAULT_REGION"
+output_dir="$SCRIPT_DIR/texts"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --help)
+      usage
+      exit 0
+      ;;
+    --region)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: --region requires a value." >&2
+        exit 1
+      fi
+      region="$2"
+      shift 2
+      ;;
+    --output-dir)
+      if [[ $# -lt 2 ]]; then
+        echo "Error: --output-dir requires a value." >&2
+        exit 1
+      fi
+      output_dir="$2"
+      shift 2
+      ;;
+    --*)
+      echo "Error: unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 if [[ $# -eq 0 ]]; then
   usage
   exit 1
@@ -54,9 +95,9 @@ require_command jq
 require_command mktemp
 validate_invoke_target
 
-mkdir -p "$OUTPUT_DIR"
+mkdir -p "$output_dir"
 
-output_text="$(next_numbered_path "$OUTPUT_DIR" "$RESPONSE_PREFIX" "$RESPONSE_SUFFIX")"
+output_text="$(next_numbered_path "$output_dir" "$RESPONSE_PREFIX" "$RESPONSE_SUFFIX")"
 request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-request.XXXXXX.json")"
 response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-response.XXXXXX.json")"
 aws_request_file="$(aws_cli_path "$request_file")"
@@ -92,7 +133,7 @@ jq -n \
   }' > "$request_file"
 
 aws bedrock-runtime invoke-model \
-  --region "$REGION" \
+  --region "$region" \
   --model-id "$INVOKE_TARGET" \
   --body "file://$aws_request_file" \
   --cli-binary-format raw-in-base64-out \

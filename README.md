@@ -87,6 +87,12 @@ aws configure
 ./generate-text.sh "Summarize the main differences between REST and GraphQL."
 ```
 
+Optional flags:
+
+- `--region` to override the default AWS region
+- `--output-dir` to choose where generated files are written
+- `--no-open` on the image script to skip opening the output file
+
 Windows note:
 
 - use Git Bash for the current scripts
@@ -110,6 +116,7 @@ Generate an image with Amazon Nova Canvas:
 
 ```bash
 ./generate-image.sh "A green parrot sitting on a tree branch, tropical jungle, photorealistic, high detail"
+./generate-image.sh --region us-west-2 --output-dir ./tmp-images --no-open "A studio portrait of a red fox"
 ```
 
 What it does:
@@ -124,6 +131,7 @@ Generate text with Amazon Nova 2 Lite:
 
 ```bash
 ./generate-text.sh "Summarize the main differences between REST and GraphQL."
+./generate-text.sh --region us-west-2 --output-dir ./tmp-texts "Write a short markdown summary of REST vs GraphQL."
 ```
 
 What it does:
