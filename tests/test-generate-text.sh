@@ -44,13 +44,18 @@ chmod +x "$work_dir/mock-bin/aws"
 export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
 
+expected_request_path="$TMPDIR/bedrock-text-request"
+if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
+  expected_request_path="$(cygpath -w "$expected_request_path")"
+fi
+
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" "first prompt" >"$work_dir/first.out"
 [[ -f "$work_dir/texts/response-0001.md" ]]
 [[ "$(cat "$work_dir/texts/response-0001.md")" == "fake-text-response" ]]
 grep -q "Created .*response-0001.md" "$work_dir/first.out"
 grep -q "fake-text-response" "$work_dir/first.out"
 grep -q -- '--model-id us.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
-grep -q -- "file://$TMPDIR/bedrock-text-request" "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-text.sh" "second prompt" >/dev/null

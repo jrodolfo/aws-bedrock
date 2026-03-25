@@ -59,10 +59,15 @@ chmod +x "$work_dir/mock-bin/aws" "$work_dir/mock-bin/open" "$work_dir/mock-bin/
 export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
 
+expected_request_path="$TMPDIR/bedrock-request"
+if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
+  expected_request_path="$(cygpath -w "$expected_request_path")"
+fi
+
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "first prompt" >/dev/null
 [[ -f "$work_dir/images/image-0001.png" ]]
 [[ "$(cat "$work_dir/images/image-0001.png")" == "fake-image-data" ]]
-grep -q -- "file://$TMPDIR/bedrock-request" "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "second prompt" >/dev/null
 [[ -f "$work_dir/images/image-0002.png" ]]
