@@ -23,6 +23,8 @@ cat > "$work_dir/mock-bin/aws" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
+printf '%s\n' "$*" > "$TMPDIR/aws-bedrock-last-args.txt"
+
 response_file="${@: -1}"
 image_b64="$(printf 'fake-image-data' | base64)"
 
@@ -38,9 +40,13 @@ EOF
 
 chmod +x "$work_dir/mock-bin/aws" "$work_dir/mock-bin/open"
 
+export TMPDIR="$work_dir/tmp"
+mkdir -p "$TMPDIR"
+
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "first prompt" >/dev/null
 [[ -f "$work_dir/images/image-0001.png" ]]
 [[ "$(cat "$work_dir/images/image-0001.png")" == "fake-image-data" ]]
+grep -q -- "file://$TMPDIR/bedrock-request" "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" "second prompt" >/dev/null
 [[ -f "$work_dir/images/image-0002.png" ]]
@@ -52,3 +58,21 @@ if PATH="$work_dir/mock-bin:$PATH" MODEL_ID="amazon.nova-2-lite-v1:0" \
 fi
 
 grep -q "not an image-generation model" "$work_dir/invalid-model.err"
+
+cat > "$work_dir/mock-bin/cygpath" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" != "-w" ]]; then
+  echo "unexpected cygpath arguments: $*" >&2
+  exit 1
+fi
+
+unix_path="$2"
+printf 'C:\\gitbash%s\n' "${unix_path//\//\\}"
+EOF
+
+chmod +x "$work_dir/mock-bin/cygpath"
+
+PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-image.sh" "windows prompt" >/dev/null
+grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"

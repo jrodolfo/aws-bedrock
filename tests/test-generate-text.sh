@@ -42,6 +42,7 @@ PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" "first prompt" >"$w
 grep -q "Created .*response-0001.md" "$work_dir/first.out"
 grep -q "fake-text-response" "$work_dir/first.out"
 grep -q -- '--model-id us.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q -- "file://$TMPDIR/bedrock-text-request" "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-text.sh" "second prompt" >/dev/null
@@ -55,3 +56,21 @@ if PATH="$work_dir/mock-bin:$PATH" MODEL_ID="amazon.nova-canvas-v1:0" TEXT_INFER
 fi
 
 grep -q "not a supported Nova 2 Lite invoke target" "$work_dir/invalid-model.err"
+
+cat > "$work_dir/mock-bin/cygpath" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" != "-w" ]]; then
+  echo "unexpected cygpath arguments: $*" >&2
+  exit 1
+fi
+
+unix_path="$2"
+printf 'C:\\gitbash%s\n' "${unix_path//\//\\}"
+EOF
+
+chmod +x "$work_dir/mock-bin/cygpath"
+
+PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-text.sh" "windows prompt" >/dev/null
+grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"

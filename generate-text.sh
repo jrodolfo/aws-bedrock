@@ -37,6 +37,19 @@ require_command() {
   fi
 }
 
+aws_cli_path() {
+  local target_path="$1"
+
+  if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
+    if command -v cygpath >/dev/null 2>&1; then
+      cygpath -w "$target_path"
+      return 0
+    fi
+  fi
+
+  printf '%s\n' "$target_path"
+}
+
 validate_invoke_target() {
   if [[ -n "${MODEL_ID:-}" ]]; then
     case "$MODEL_ID" in
@@ -88,6 +101,8 @@ mkdir -p "$OUTPUT_DIR"
 output_text="$(next_response_name)"
 request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-request.XXXXXX.json")"
 response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-response.XXXXXX.json")"
+aws_request_file="$(aws_cli_path "$request_file")"
+aws_response_file="$(aws_cli_path "$response_file")"
 
 cleanup() {
   rm -f "$request_file" "$response_file"
@@ -121,9 +136,9 @@ jq -n \
 aws bedrock-runtime invoke-model \
   --region "$REGION" \
   --model-id "$INVOKE_TARGET" \
-  --body "file://$request_file" \
+  --body "file://$aws_request_file" \
   --cli-binary-format raw-in-base64-out \
-  "$response_file" >/dev/null
+  "$aws_response_file" >/dev/null
 
 jq -r '.output.message.content[]? | select(has("text")) | .text' "$response_file" > "$output_text"
 

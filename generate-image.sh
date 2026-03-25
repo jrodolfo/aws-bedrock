@@ -34,6 +34,19 @@ require_command() {
   fi
 }
 
+aws_cli_path() {
+  local target_path="$1"
+
+  if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
+    if command -v cygpath >/dev/null 2>&1; then
+      cygpath -w "$target_path"
+      return 0
+    fi
+  fi
+
+  printf '%s\n' "$target_path"
+}
+
 validate_model_id() {
   case "$MODEL_ID" in
     amazon.nova-canvas-v1:0)
@@ -122,6 +135,8 @@ mkdir -p "$OUTPUT_DIR"
 output_image="$(next_image_name)"
 request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-request.XXXXXX.json")"
 response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-response.XXXXXX.json")"
+aws_request_file="$(aws_cli_path "$request_file")"
+aws_response_file="$(aws_cli_path "$response_file")"
 
 cleanup() {
   rm -f "$request_file" "$response_file"
@@ -150,9 +165,9 @@ jq -n \
 aws bedrock-runtime invoke-model \
   --region "$REGION" \
   --model-id "$MODEL_ID" \
-  --body "file://$request_file" \
+  --body "file://$aws_request_file" \
   --cli-binary-format raw-in-base64-out \
-  "$response_file" >/dev/null
+  "$aws_response_file" >/dev/null
 
 image_b64="$(jq -r '.images[0] // empty' "$response_file")"
 

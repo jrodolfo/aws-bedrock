@@ -91,6 +91,7 @@ Windows note:
 
 - use Git Bash for the current scripts
 - PowerShell is not a first-class target yet
+- when Git Bash calls the Windows AWS CLI, the scripts convert temp-file paths for `aws.exe`
 
 ## project structure
 
@@ -167,6 +168,7 @@ The tests mock the `aws` command, so they do not make live Bedrock calls.
 
 - If you see `Error: required command not found: jq`, install `jq`, restart Git Bash, and rerun `command -v jq`.
 - If you see `Error: required command not found: aws`, install the AWS CLI, restart Git Bash, and rerun `command -v aws`.
+- If you see an AWS CLI error about `file:///tmp/...` not being found on Windows, update to the latest version of these scripts so Git Bash temp paths are converted for `aws.exe`.
 - If `aws configure` has not been run yet, the scripts will fail when Bedrock is invoked.
 - If Bedrock access is not enabled for the configured account and region, the AWS CLI call will fail even when local tools are installed correctly.
 
