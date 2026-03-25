@@ -11,7 +11,7 @@ readonly MAX_TOKENS=1000
 readonly TEMPERATURE=0.7
 readonly TOP_P=0.9
 readonly RESPONSE_PREFIX="response-"
-readonly RESPONSE_SUFFIX=".txt"
+readonly RESPONSE_SUFFIX=".md"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly OUTPUT_DIR="$SCRIPT_DIR/texts"
 

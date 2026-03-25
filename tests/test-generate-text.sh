@@ -44,15 +44,15 @@ export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
 
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" "first prompt" >"$work_dir/first.out"
-[[ -f "$work_dir/texts/response-0001.txt" ]]
-[[ "$(cat "$work_dir/texts/response-0001.txt")" == "fake-text-response" ]]
-grep -q "Created .*response-0001.txt" "$work_dir/first.out"
+[[ -f "$work_dir/texts/response-0001.md" ]]
+[[ "$(cat "$work_dir/texts/response-0001.md")" == "fake-text-response" ]]
+grep -q "Created .*response-0001.md" "$work_dir/first.out"
 grep -q "fake-text-response" "$work_dir/first.out"
 grep -q -- '--model-id us.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
 
 PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-text.sh" "second prompt" >/dev/null
-[[ -f "$work_dir/texts/response-0002.txt" ]]
+[[ -f "$work_dir/texts/response-0002.md" ]]
 grep -q -- '--model-id eu.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
 
 if PATH="$work_dir/mock-bin:$PATH" MODEL_ID="amazon.nova-canvas-v1:0" TEXT_INFERENCE_PROFILE_ID="us.amazon.nova-2-lite-v1:0" \

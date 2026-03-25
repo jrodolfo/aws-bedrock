@@ -85,7 +85,7 @@ Generate text with Amazon Nova 2 Lite:
 What it does:
 
 - sends the prompt through the configured Nova 2 Lite inference profile
-- saves the result under `texts/` as `response-0001.txt`, `response-0002.txt`, and so on
+- saves the result under `texts/` as `response-0001.md`, `response-0002.md`, and so on
 - prints the generated response to the terminal
 
 Configuration notes:
