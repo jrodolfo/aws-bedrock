@@ -97,6 +97,7 @@ decode_base64_to_file() {
 
 open_file() {
   local target_file="$1"
+  local windows_target
 
   if command -v open >/dev/null 2>&1; then
     open "$target_file" >/dev/null 2>&1 || true
@@ -108,12 +109,16 @@ open_file() {
     return 0
   fi
 
-  if command -v cmd.exe >/dev/null 2>&1; then
-    if command -v cygpath >/dev/null 2>&1; then
-      cmd.exe /c start "" "$(cygpath -w "$target_file")" >/dev/null 2>&1 || true
-    else
-      cmd.exe /c start "" "$target_file" >/dev/null 2>&1 || true
-    fi
+  if command -v powershell.exe >/dev/null 2>&1; then
+    windows_target="$(aws_cli_path "$target_file")"
+    powershell.exe -NoProfile -NonInteractive -Command "Start-Process -FilePath '$windows_target'" >/dev/null 2>&1 || true
+    return 0
+  fi
+
+  if command -v explorer.exe >/dev/null 2>&1; then
+    windows_target="$(aws_cli_path "$target_file")"
+    explorer.exe "$windows_target" >/dev/null 2>&1 || true
+    return 0
   fi
 }
 

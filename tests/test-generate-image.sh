@@ -38,7 +38,15 @@ set -euo pipefail
 exit 0
 EOF
 
-chmod +x "$work_dir/mock-bin/aws" "$work_dir/mock-bin/open"
+cat > "$work_dir/mock-bin/powershell.exe" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+printf '%s\n' "$*" > "$TMPDIR/powershell-last-args.txt"
+exit 0
+EOF
+
+chmod +x "$work_dir/mock-bin/aws" "$work_dir/mock-bin/open" "$work_dir/mock-bin/powershell.exe"
 
 export TMPDIR="$work_dir/tmp"
 mkdir -p "$TMPDIR"
@@ -76,3 +84,4 @@ chmod +x "$work_dir/mock-bin/cygpath"
 
 PATH="$work_dir/mock-bin:$PATH" OSTYPE=msys "$work_dir/generate-image.sh" "windows prompt" >/dev/null
 grep -q -- 'file://C:\\gitbash' "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q -- "Start-Process -FilePath 'C:\\\\gitbash" "$TMPDIR/powershell-last-args.txt"
