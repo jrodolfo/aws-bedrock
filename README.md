@@ -33,7 +33,7 @@ That split keeps the model contracts explicit and avoids mixing image-generation
 
 ## windows setup
 
-These scripts are intended to run in Git Bash on Windows.
+These scripts are intended to run on macOS, Linux, and Windows. On Windows, use Git Bash.
 
 1. Install the required tools.
 
