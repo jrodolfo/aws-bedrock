@@ -31,6 +31,42 @@ That split keeps the model contracts explicit and avoids mixing image-generation
 - `jq`
 - `base64`
 
+## windows setup
+
+These scripts are intended to run in Git Bash on Windows.
+
+1. Install the required tools.
+
+```powershell
+winget install --id Git.Git -e
+winget install --id Amazon.AWSCLI -e
+winget install --id jqlang.jq -e
+```
+
+If you use Chocolatey instead of `winget`:
+
+```powershell
+choco install git awscli jq
+```
+
+2. Restart Git Bash after installation so the updated `PATH` is visible.
+
+3. Verify the required commands are available from Git Bash.
+
+```bash
+command -v bash
+command -v aws
+command -v jq
+command -v base64
+command -v mktemp
+```
+
+4. Configure AWS credentials if needed.
+
+```bash
+aws configure
+```
+
 ## getting started
 
 1. Configure your AWS credentials if you have not done that yet.
@@ -126,6 +162,13 @@ Run the test scripts:
 ```
 
 The tests mock the `aws` command, so they do not make live Bedrock calls.
+
+## troubleshooting
+
+- If you see `Error: required command not found: jq`, install `jq`, restart Git Bash, and rerun `command -v jq`.
+- If you see `Error: required command not found: aws`, install the AWS CLI, restart Git Bash, and rerun `command -v aws`.
+- If `aws configure` has not been run yet, the scripts will fail when Bedrock is invoked.
+- If Bedrock access is not enabled for the configured account and region, the AWS CLI call will fail even when local tools are installed correctly.
 
 ## notes
 

@@ -27,6 +27,9 @@ require_command() {
 
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "Error: required command not found: $cmd" >&2
+    if [[ "$OSTYPE" == msys* || "$OSTYPE" == cygwin* ]]; then
+      echo "On Windows with Git Bash, install $cmd and restart Git Bash so PATH is refreshed." >&2
+    fi
     exit 1
   fi
 }
