@@ -207,10 +207,10 @@ The tests mock the `aws` command, so they do not make live Bedrock calls.
 
 ## troubleshooting
 
-- If you see `Error: required command not found: jq`, install `jq`, restart Git Bash, and rerun `command -v jq`.
-- If you see `Error: required command not found: aws`, install the AWS CLI, restart Git Bash, and rerun `command -v aws`.
-- If `aws configure` has not been run yet, the scripts will fail when Bedrock is invoked.
-- If Bedrock access is not enabled for the configured account and region, the AWS CLI call will fail even when local tools are installed correctly.
+- Missing Bedrock access: if the AWS CLI is configured but the Bedrock call still fails, verify model access in the Bedrock console for the selected region.
+- Inference profile errors: Nova 2 Lite may require an inference profile instead of direct on-demand invocation. Set `TEXT_INFERENCE_PROFILE_ID` if needed. The script defaults to `us.amazon.nova-2-lite-v1:0`.
+- Headless servers: on EC2 or other non-GUI machines, the image script still saves the PNG and prints its full path even if nothing opens automatically.
+- Windows Git Bash: use Git Bash for the current scripts, not PowerShell. Verify `aws`, `jq`, `base64`, and `mktemp` are available from Git Bash.
 
 ## notes
 
