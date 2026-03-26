@@ -161,10 +161,6 @@ if [[ ! -s "$output_text" ]]; then
   echo "Error: Bedrock response did not contain output.message.content[].text." >&2
   echo "Response saved at: $response_file" >&2
   rm -f "$output_text"
-  if [[ "$debug_mode" -eq 0 ]]; then
-    trap - EXIT
-    rm -f "$request_file"
-  fi
   exit 1
 fi
 

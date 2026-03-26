@@ -212,10 +212,6 @@ image_b64="$(jq -r '.images[0] // empty' "$response_file")"
 if [[ -z "$image_b64" ]]; then
   echo "Error: Bedrock response did not contain .images[0]." >&2
   echo "Response saved at: $response_file" >&2
-  if [[ "$debug_mode" -eq 0 ]]; then
-    trap - EXIT
-    rm -f "$request_file"
-  fi
   exit 1
 fi
 
