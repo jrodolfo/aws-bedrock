@@ -123,7 +123,7 @@ export AWS_REGION=us-west-2
 export TEXT_INFERENCE_PROFILE_ID=us.amazon.nova-2-lite-v1:0
 ```
 
-See [.env.example](/Users/jrodolfo/workspace/aws/aws-bedrock/.env.example) for a minimal template.
+See [.env.example](.env.example) for a minimal template.
 
 Windows note:
 
