@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly DEFAULT_REGION="${BEDROCK_REGION:-${AWS_REGION:-us-east-1}}"
+readonly DEFAULT_REGION="${AWS_REGION:-us-east-1}"
 readonly TEXT_MODEL_ID="amazon.nova-2-lite-v1:0"
 readonly DEFAULT_INFERENCE_PROFILE_ID="us.amazon.nova-2-lite-v1:0"
 readonly INFERENCE_PROFILE_ID="${TEXT_INFERENCE_PROFILE_ID:-$DEFAULT_INFERENCE_PROFILE_ID}"

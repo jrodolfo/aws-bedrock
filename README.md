@@ -99,7 +99,6 @@ You can configure the scripts with environment variables instead of passing ever
 
 Common:
 
-- `BEDROCK_REGION`
 - `AWS_REGION`
 
 Image generation:
@@ -114,14 +113,13 @@ Text generation:
 Precedence for region:
 
 1. `--region`
-2. `BEDROCK_REGION`
-3. `AWS_REGION`
-4. built-in default `us-east-1`
+2. `AWS_REGION`
+3. built-in default `us-east-1`
 
 Example:
 
 ```bash
-export BEDROCK_REGION=us-west-2
+export AWS_REGION=us-west-2
 export TEXT_INFERENCE_PROFILE_ID=us.amazon.nova-2-lite-v1:0
 ```
 

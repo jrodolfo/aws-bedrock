@@ -86,7 +86,7 @@ fi
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --output-dir "$custom_image_dir" "second prompt" >/dev/null
 [[ -f "$custom_image_dir/image-0002.png" ]]
 
-PATH="$work_dir/mock-bin:$PATH" BEDROCK_REGION="eu-central-1" \
+PATH="$work_dir/mock-bin:$PATH" AWS_REGION="eu-central-1" \
   "$work_dir/generate-image.sh" --output-dir "$custom_image_dir" "env region prompt" >/dev/null
 grep -q -- '--region eu-central-1' "$TMPDIR/aws-bedrock-last-args.txt"
 
