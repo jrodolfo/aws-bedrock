@@ -12,6 +12,14 @@ require_command() {
   fi
 }
 
+require_commands() {
+  local cmd
+
+  for cmd in "$@"; do
+    require_command "$cmd"
+  done
+}
+
 aws_cli_path() {
   local target_path="$1"
 

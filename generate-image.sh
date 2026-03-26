@@ -147,10 +147,7 @@ fi
 
 prompt_text="$*"
 
-require_command aws
-require_command jq
-require_command base64
-require_command mktemp
+require_commands aws jq base64 mktemp
 validate_model_id
 
 mkdir -p "$output_dir"

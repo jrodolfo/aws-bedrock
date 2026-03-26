@@ -90,9 +90,7 @@ fi
 
 prompt_text="$*"
 
-require_command aws
-require_command jq
-require_command mktemp
+require_commands aws jq mktemp
 validate_invoke_target
 
 mkdir -p "$output_dir"
