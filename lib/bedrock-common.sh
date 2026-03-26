@@ -38,20 +38,25 @@ next_numbered_path() {
   local prefix="$2"
   local suffix="$3"
   local max_num=0
+  local matches=()
   local file
   local base_name
   local num
 
   shopt -s nullglob
-  for file in "$output_dir"/${prefix}[0-9][0-9][0-9][0-9]${suffix}; do
-    base_name="${file##*/}"
-    num="${base_name#${prefix}}"
-    num="${num%${suffix}}"
-    if (( 10#$num > max_num )); then
-      max_num=$((10#$num))
-    fi
-  done
+  matches=("$output_dir"/${prefix}[0-9][0-9][0-9][0-9]${suffix})
   shopt -u nullglob
+
+  if ((${#matches[@]} > 0)); then
+    for file in "${matches[@]}"; do
+      base_name="${file##*/}"
+      num="${base_name#${prefix}}"
+      num="${num%${suffix}}"
+      if [[ "$num" =~ ^[0-9]{4}$ ]] && (( 10#$num > max_num )); then
+        max_num=$((10#$num))
+      fi
+    done
+  fi
 
   printf "%s/%s%04d%s\n" "$output_dir" "$prefix" "$((max_num + 1))" "$suffix"
 }
