@@ -203,6 +203,26 @@ Run the test scripts:
 
 The tests mock the `aws` command, so they do not make live Bedrock calls.
 
+## makefile
+
+Common commands:
+
+```bash
+make help
+make check
+make test
+make test-image
+make test-text
+```
+
+What they do:
+
+- `make help` shows the available targets
+- `make check` runs shell syntax checks
+- `make test` runs the full test suite
+- `make test-image` runs only the image script tests
+- `make test-text` runs only the text script tests
+
 ## troubleshooting
 
 - Missing Bedrock access: if the AWS CLI is configured but the Bedrock call still fails, verify model access in the Bedrock console for the selected region.
