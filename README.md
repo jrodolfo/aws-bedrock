@@ -31,11 +31,21 @@ That split keeps the model contracts explicit and avoids mixing image-generation
 - `jq`
 - `base64`
 
-## windows setup
+## getting started
 
-These scripts are intended to run on macOS, Linux, and Windows. On Windows, use Git Bash.
+1. Install and verify the required tools.
 
-1. Install the required tools.
+On Windows, use Git Bash.
+
+```bash
+command -v bash
+command -v aws
+command -v jq
+command -v base64
+command -v mktemp
+```
+
+Windows install example:
 
 ```powershell
 winget install --id Git.Git -e
@@ -49,38 +59,18 @@ If you use Chocolatey instead of `winget`:
 choco install git awscli jq
 ```
 
-2. Restart Git Bash after installation so the updated `PATH` is visible.
-
-3. Verify the required commands are available from Git Bash.
-
-```bash
-command -v bash
-command -v aws
-command -v jq
-command -v base64
-command -v mktemp
-```
-
-4. Configure AWS credentials if needed.
+2. Configure your AWS credentials if needed.
 
 ```bash
 aws configure
 ```
 
-## getting started
-
-1. Configure your AWS credentials if you have not done that yet.
-
-```bash
-aws configure
-```
-
-2. Make sure your account can invoke the models used by these scripts.
+3. Make sure your account can invoke the models used by these scripts.
 
 - `amazon.nova-canvas-v1:0`
 - a Nova 2 Lite inference profile such as `us.amazon.nova-2-lite-v1:0`
 
-3. Run one of the generators.
+4. Run one of the generators.
 
 ```bash
 ./generate-image.sh "A green parrot sitting on a tree branch, tropical jungle, photorealistic, high detail"
@@ -124,11 +114,6 @@ export TEXT_INFERENCE_PROFILE_ID=us.amazon.nova-2-lite-v1:0
 ```
 
 See [.env.example](.env.example) for a minimal template.
-
-Windows note:
-
-- use Git Bash for the current scripts
-- PowerShell is not a first-class target yet
 
 ## project structure
 
@@ -228,7 +213,7 @@ What they do:
 - Missing Bedrock access: if the AWS CLI is configured but the Bedrock call still fails, verify model access in the Bedrock console for the selected region.
 - Inference profile errors: Nova 2 Lite may require an inference profile instead of direct on-demand invocation. Set `TEXT_INFERENCE_PROFILE_ID` if needed. The script defaults to `us.amazon.nova-2-lite-v1:0`.
 - Headless servers: on EC2 or other non-GUI machines, the image script still saves the PNG and prints its full path even if nothing opens automatically.
-- Windows Git Bash: use Git Bash for the current scripts, not PowerShell. Verify `aws`, `jq`, `base64`, and `mktemp` are available from Git Bash.
+- Windows Git Bash: use Git Bash for the current scripts. Verify `aws`, `jq`, `base64`, and `mktemp` are available there.
 
 ## notes
 
