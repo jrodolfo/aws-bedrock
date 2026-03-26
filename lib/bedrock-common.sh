@@ -33,6 +33,19 @@ aws_cli_path() {
   printf '%s\n' "$target_path"
 }
 
+make_temp_file() {
+  local prefix="$1"
+  local suffix="$2"
+  local tmp_dir="${TMPDIR:-/tmp}"
+  local temp_base
+  local temp_file
+
+  temp_base="$(mktemp "$tmp_dir/${prefix}.XXXXXX")"
+  temp_file="${temp_base}${suffix}"
+  mv "$temp_base" "$temp_file"
+  printf '%s\n' "$temp_file"
+}
+
 next_numbered_path() {
   local output_dir="$1"
   local prefix="$2"

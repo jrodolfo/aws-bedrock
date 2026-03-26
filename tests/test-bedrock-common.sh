@@ -32,3 +32,7 @@ printf 'e' > "$mixed_dir/other-0009.png"
 
 next_path="$(next_numbered_path "$mixed_dir" "image-" ".png")"
 [[ "$next_path" == "$mixed_dir/image-0011.png" ]]
+
+temp_json="$(make_temp_file "bedrock-common-test" ".json")"
+[[ "$temp_json" == *.json ]]
+[[ -f "$temp_json" ]]

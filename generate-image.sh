@@ -159,8 +159,8 @@ validate_model_id
 mkdir -p "$output_dir"
 
 output_image="$(next_numbered_path "$output_dir" "$IMAGE_PREFIX" "$IMAGE_SUFFIX")"
-request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-request.XXXXXX.json")"
-response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-response.XXXXXX.json")"
+request_file="$(make_temp_file "bedrock-request" ".json")"
+response_file="$(make_temp_file "bedrock-response" ".json")"
 aws_request_file="$(aws_cli_path "$request_file")"
 aws_response_file="$(aws_cli_path "$response_file")"
 

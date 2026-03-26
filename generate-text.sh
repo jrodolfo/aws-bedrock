@@ -102,8 +102,8 @@ validate_invoke_target
 mkdir -p "$output_dir"
 
 output_text="$(next_numbered_path "$output_dir" "$RESPONSE_PREFIX" "$RESPONSE_SUFFIX")"
-request_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-request.XXXXXX.json")"
-response_file="$(mktemp "${TMPDIR:-/tmp}/bedrock-text-response.XXXXXX.json")"
+request_file="$(make_temp_file "bedrock-text-request" ".json")"
+response_file="$(make_temp_file "bedrock-text-response" ".json")"
 aws_request_file="$(aws_cli_path "$request_file")"
 aws_response_file="$(aws_cli_path "$response_file")"
 
