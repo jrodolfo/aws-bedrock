@@ -57,7 +57,8 @@ if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
 fi
 
 custom_text_dir="$work_dir/custom-texts"
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --region us-west-2 --output-dir "$custom_text_dir" "first prompt" >"$work_dir/first.out"
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --region us-west-2 --output-dir "$custom_text_dir" "first prompt" \
+  >"$work_dir/first.out" 2>"$work_dir/first.err"
 [[ -f "$custom_text_dir/response-0001.md" ]]
 [[ "$(cat "$custom_text_dir/response-0001.md")" == "fake-text-response" ]]
 grep -q "Created .*response-0001.md" "$work_dir/first.out"
@@ -65,6 +66,7 @@ grep -q "fake-text-response" "$work_dir/first.out"
 grep -q -- '--model-id us.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-args.txt"
 grep -Fq -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
 grep -q -- '--region us-west-2' "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q 'Invoking Amazon Bedrock text generation' "$work_dir/first.err"
 
 PATH="$work_dir/mock-bin:$PATH" TEXT_INFERENCE_PROFILE_ID="eu.amazon.nova-2-lite-v1:0" \
   "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "second prompt" >/dev/null

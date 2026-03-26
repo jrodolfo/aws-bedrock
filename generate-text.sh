@@ -130,6 +130,8 @@ jq -n \
     }
   }' > "$request_file"
 
+echo "Invoking Amazon Bedrock text generation..." >&2
+
 aws bedrock-runtime invoke-model \
   --region "$region" \
   --model-id "$INVOKE_TARGET" \

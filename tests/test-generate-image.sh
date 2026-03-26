@@ -73,11 +73,13 @@ if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
 fi
 
 custom_image_dir="$work_dir/custom-images"
-PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --region us-west-2 --output-dir "$custom_image_dir" --no-open "first prompt" >/dev/null
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --region us-west-2 --output-dir "$custom_image_dir" --no-open "first prompt" \
+  >/dev/null 2>"$work_dir/first.err"
 [[ -f "$custom_image_dir/image-0001.png" ]]
 [[ "$(cat "$custom_image_dir/image-0001.png")" == "fake-image-data" ]]
 grep -Fq -- "file://$expected_request_path" "$TMPDIR/aws-bedrock-last-args.txt"
 grep -q -- '--region us-west-2' "$TMPDIR/aws-bedrock-last-args.txt"
+grep -q 'Invoking Amazon Bedrock image generation' "$work_dir/first.err"
 if [[ -f "$TMPDIR/powershell-last-args.txt" ]]; then
   echo "Expected --no-open to skip opener invocation" >&2
   exit 1

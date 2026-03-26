@@ -182,6 +182,8 @@ jq -n \
     }
   }' > "$request_file"
 
+echo "Invoking Amazon Bedrock image generation..." >&2
+
 aws bedrock-runtime invoke-model \
   --region "$region" \
   --model-id "$MODEL_ID" \
