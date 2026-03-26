@@ -20,7 +20,7 @@ source "$COMMON_LIB"
 usage() {
   cat <<'EOF'
 Usage:
-  ./generate-text.sh [--region REGION] [--output-dir DIR] "your prompt text"
+  ./generate-text.sh [--region REGION] [--output-dir DIR] [--debug] "your prompt text"
   ./generate-text.sh --help
 
 Example:
@@ -30,6 +30,7 @@ Options:
   --help              Show this help message
   --region REGION     AWS region to use (default: us-east-1)
   --output-dir DIR    Directory for generated text files (default: ./texts)
+  --debug             Preserve temp request/response files and print their paths
 EOF
 }
 
@@ -49,6 +50,7 @@ validate_invoke_target() {
 
 region="$DEFAULT_REGION"
 output_dir="$SCRIPT_DIR/texts"
+debug_mode=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -71,6 +73,10 @@ while [[ $# -gt 0 ]]; do
       fi
       output_dir="$2"
       shift 2
+      ;;
+    --debug)
+      debug_mode=1
+      shift
       ;;
     --*)
       echo "Error: unknown option: $1" >&2
@@ -102,10 +108,20 @@ aws_request_file="$(aws_cli_path "$request_file")"
 aws_response_file="$(aws_cli_path "$response_file")"
 
 cleanup() {
-  rm -f "$request_file" "$response_file"
+  if [[ "$debug_mode" -eq 0 ]]; then
+    rm -f "$request_file" "$response_file"
+  fi
 }
 
 trap cleanup EXIT
+
+if [[ "$debug_mode" -eq 1 ]]; then
+  echo "Debug: region=$region" >&2
+  echo "Debug: invoke_target=$INVOKE_TARGET" >&2
+  echo "Debug: output_text=$output_text" >&2
+  echo "Debug: request_file=$request_file" >&2
+  echo "Debug: response_file=$response_file" >&2
+fi
 
 jq -n \
   --arg text "$prompt_text" \
@@ -145,8 +161,10 @@ if [[ ! -s "$output_text" ]]; then
   echo "Error: Bedrock response did not contain output.message.content[].text." >&2
   echo "Response saved at: $response_file" >&2
   rm -f "$output_text"
-  trap - EXIT
-  rm -f "$request_file"
+  if [[ "$debug_mode" -eq 0 ]]; then
+    trap - EXIT
+    rm -f "$request_file"
+  fi
   exit 1
 fi
 

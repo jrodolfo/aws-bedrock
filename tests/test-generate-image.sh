@@ -66,6 +66,7 @@ PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --help >"$work_dir
 grep -q -- '--region REGION' "$work_dir/help.out"
 grep -q -- '--output-dir DIR' "$work_dir/help.out"
 grep -q -- '--no-open' "$work_dir/help.out"
+grep -q -- '--debug' "$work_dir/help.out"
 
 expected_request_path="$TMPDIR/bedrock-request"
 if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
@@ -91,6 +92,13 @@ PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --output-dir "$cus
 PATH="$work_dir/mock-bin:$PATH" AWS_REGION="eu-central-1" \
   "$work_dir/generate-image.sh" --output-dir "$custom_image_dir" "env region prompt" >/dev/null
 grep -q -- '--region eu-central-1' "$TMPDIR/aws-bedrock-last-args.txt"
+
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --debug --output-dir "$custom_image_dir" --no-open "debug prompt" \
+  >/dev/null 2>"$work_dir/debug.err"
+debug_request_file="$(grep '^Debug: request_file=' "$work_dir/debug.err" | sed 's/^Debug: request_file=//')"
+debug_response_file="$(grep '^Debug: response_file=' "$work_dir/debug.err" | sed 's/^Debug: response_file=//')"
+[[ -f "$debug_request_file" ]]
+[[ -f "$debug_response_file" ]]
 
 printf 'older-image' > "$custom_image_dir/image-0007.png"
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-image.sh" --output-dir "$custom_image_dir" "third prompt" >/dev/null

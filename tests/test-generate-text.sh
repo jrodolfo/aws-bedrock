@@ -50,6 +50,7 @@ mkdir -p "$TMPDIR"
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --help >"$work_dir/help.out"
 grep -q -- '--region REGION' "$work_dir/help.out"
 grep -q -- '--output-dir DIR' "$work_dir/help.out"
+grep -q -- '--debug' "$work_dir/help.out"
 
 expected_request_path="$TMPDIR/bedrock-text-request"
 if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* ]]; then
@@ -76,6 +77,13 @@ grep -q -- '--model-id eu.amazon.nova-2-lite-v1:0' "$TMPDIR/aws-bedrock-last-arg
 PATH="$work_dir/mock-bin:$PATH" AWS_REGION="eu-central-1" \
   "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "env region prompt" >/dev/null
 grep -q -- '--region eu-central-1' "$TMPDIR/aws-bedrock-last-args.txt"
+
+PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --debug --output-dir "$custom_text_dir" "debug prompt" \
+  >"$work_dir/debug.out" 2>"$work_dir/debug.err"
+debug_request_file="$(grep '^Debug: request_file=' "$work_dir/debug.err" | sed 's/^Debug: request_file=//')"
+debug_response_file="$(grep '^Debug: response_file=' "$work_dir/debug.err" | sed 's/^Debug: response_file=//')"
+[[ -f "$debug_request_file" ]]
+[[ -f "$debug_response_file" ]]
 
 printf 'older-response' > "$custom_text_dir/response-0007.md"
 PATH="$work_dir/mock-bin:$PATH" "$work_dir/generate-text.sh" --output-dir "$custom_text_dir" "third prompt" >/dev/null

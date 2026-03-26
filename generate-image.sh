@@ -17,7 +17,7 @@ source "$COMMON_LIB"
 usage() {
   cat <<'EOF'
 Usage:
-  ./generate-image.sh [--region REGION] [--output-dir DIR] [--no-open] "your prompt text"
+  ./generate-image.sh [--region REGION] [--output-dir DIR] [--no-open] [--debug] "your prompt text"
   ./generate-image.sh --help
 
 Example:
@@ -28,6 +28,7 @@ Options:
   --region REGION     AWS region to use (default: us-east-1)
   --output-dir DIR    Directory for generated images (default: ./images)
   --no-open           Do not try to open the generated image after creation
+  --debug             Preserve temp request/response files and print their paths
 EOF
 }
 
@@ -102,6 +103,7 @@ open_file() {
 region="$DEFAULT_REGION"
 output_dir="$SCRIPT_DIR/images"
 should_open=1
+debug_mode=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -127,6 +129,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-open)
       should_open=0
+      shift
+      ;;
+    --debug)
+      debug_mode=1
       shift
       ;;
     --*)
@@ -159,10 +165,20 @@ aws_request_file="$(aws_cli_path "$request_file")"
 aws_response_file="$(aws_cli_path "$response_file")"
 
 cleanup() {
-  rm -f "$request_file" "$response_file"
+  if [[ "$debug_mode" -eq 0 ]]; then
+    rm -f "$request_file" "$response_file"
+  fi
 }
 
 trap cleanup EXIT
+
+if [[ "$debug_mode" -eq 1 ]]; then
+  echo "Debug: region=$region" >&2
+  echo "Debug: model_id=$MODEL_ID" >&2
+  echo "Debug: output_image=$output_image" >&2
+  echo "Debug: request_file=$request_file" >&2
+  echo "Debug: response_file=$response_file" >&2
+fi
 
 jq -n \
   --arg text "$prompt_text" \
@@ -196,8 +212,10 @@ image_b64="$(jq -r '.images[0] // empty' "$response_file")"
 if [[ -z "$image_b64" ]]; then
   echo "Error: Bedrock response did not contain .images[0]." >&2
   echo "Response saved at: $response_file" >&2
-  trap - EXIT
-  rm -f "$request_file"
+  if [[ "$debug_mode" -eq 0 ]]; then
+    trap - EXIT
+    rm -f "$request_file"
+  fi
   exit 1
 fi
 
